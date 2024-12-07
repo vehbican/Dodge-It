@@ -7,4 +7,3 @@ class ScoreManager {
 
   int get currentScore => _score;
 }
-

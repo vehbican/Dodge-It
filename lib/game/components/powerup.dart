@@ -3,7 +3,8 @@ import 'package:flame/collisions.dart';
 import '../dodge_it_game.dart';
 import 'player.dart';
 
-class PowerUp extends SpriteComponent with HasGameRef<DodgeItGame>, CollisionCallbacks {
+class PowerUp extends SpriteComponent
+    with HasGameRef<DodgeItGame>, CollisionCallbacks {
   double speed;
 
   PowerUp({required this.speed, Vector2? position}) {
@@ -38,4 +39,3 @@ class PowerUp extends SpriteComponent with HasGameRef<DodgeItGame>, CollisionCal
     super.onCollision(intersectionPoints, other);
   }
 }
-

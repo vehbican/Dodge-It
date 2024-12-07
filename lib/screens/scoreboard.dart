@@ -4,7 +4,8 @@ class Scoreboard extends StatelessWidget {
   final int score;
   final int highScore;
 
-  const Scoreboard({required this.score, required this.highScore, Key? key}) : super(key: key);
+  const Scoreboard({required this.score, required this.highScore, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,4 +17,3 @@ class Scoreboard extends StatelessWidget {
     );
   }
 }
-

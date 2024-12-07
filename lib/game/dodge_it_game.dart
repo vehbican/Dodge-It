@@ -1,7 +1,6 @@
-import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
-import 'package:flame/collisions.dart'; 
+import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'components/player.dart';
@@ -9,26 +8,34 @@ import 'components/obstacle.dart';
 import 'components/powerup.dart';
 import 'managers/score_manager.dart';
 import 'managers/level_manager.dart';
+import 'managers/local_score_manager.dart';
 import 'utilities/constants.dart';
 import 'utilities/sound_manager.dart';
 import 'dart:math';
-import 'package:flame/input.dart'; 
+import 'package:flame/input.dart';
 import 'package:flutter/services.dart';
 
-class DodgeItGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents {
+class DodgeItGame extends FlameGame
+    with HasCollisionDetection, HasKeyboardHandlerComponents {
   late Player _player;
   late ScoreManager _scoreManager;
   late LevelManager _levelManager;
-  final Random random = Random(); // Define a Random instance
+  final Random random = Random();
+  final ValueNotifier<int> playerHpNotifier = ValueNotifier<int>(3);
+  final ValueNotifier<int> scoreNotifier = ValueNotifier<int>(0);
+  Set<LogicalKeyboardKey> keysPressed = {};
 
-    @override
-    Future<void> onLoad() async {
+  @override
+  Future<void> onLoad() async {
     await super.onLoad();
 
     await SoundManager.initialize();
     SoundManager.playBackgroundMusic();
-    
-    FlameAudio.bgm.initialize();
+
+    _initializeGame();
+  }
+
+  void _initializeGame() {
     _player = Player()
       ..position = Vector2(size.x / 2, size.y - 100)
       ..anchor = Anchor.center;
@@ -36,33 +43,53 @@ class DodgeItGame extends FlameGame with HasCollisionDetection, HasKeyboardHandl
     _scoreManager = ScoreManager();
     _levelManager = LevelManager();
 
-    add(_player);
+    playerHpNotifier.value = 3;
+    scoreNotifier.value = 0;
 
+    add(_player);
     _spawnObstaclesAndGolds();
   }
 
+  void reset() {
+    SoundManager.playBackgroundMusic();
+    children
+        .whereType<Component>()
+        .forEach((component) => component.removeFromParent());
+
+    _initializeGame();
+    resumeEngine();
+  }
 
   @override
-KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-  // Check if it's a key down event
-  if (event is KeyDownEvent) {
+  KeyEventResult onKeyEvent(
+      KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    _player.velocity.setZero();
+
     if (keysPressed.contains(LogicalKeyboardKey.keyA)) {
       _player.moveLeft();
     } else if (keysPressed.contains(LogicalKeyboardKey.keyD)) {
       _player.moveRight();
-    } 
-    
-  } else if (event is KeyUpEvent) {
-    // When keys are released, you might want to stop movement
-    if (event.logicalKey == LogicalKeyboardKey.keyA || 
-        event.logicalKey == LogicalKeyboardKey.keyD) {
+    }
+
+    if (keysPressed.contains(LogicalKeyboardKey.keyW)) {
+      _player.moveUp();
+    } else if (keysPressed.contains(LogicalKeyboardKey.keyS)) {
+      _player.moveDown();
+    }
+
+    if (!keysPressed.contains(LogicalKeyboardKey.keyA) &&
+        !keysPressed.contains(LogicalKeyboardKey.keyD)) {
       _player.stopHorizontalMovement();
     }
-   
+
+    if (!keysPressed.contains(LogicalKeyboardKey.keyW) &&
+        !keysPressed.contains(LogicalKeyboardKey.keyS)) {
+      _player.stopVerticalMovement();
+    }
+
+    return KeyEventResult.handled;
   }
 
-  return KeyEventResult.handled;
-}
   void _spawnObstaclesAndGolds() {
     final obstacleSpawnTimer = TimerComponent(
       period: 1.5,
@@ -102,8 +129,6 @@ KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     add(goldSpawnTimer);
   }
 
- 
-
   @override
   void update(double dt) {
     super.update(dt);
@@ -111,30 +136,44 @@ KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
   }
 
   void onPlayerHitObstacle() {
-    print("player got hit by obstacle");
     _player.hp -= 1;
+    playerHpNotifier.value = _player.hp;
     SoundManager.playCollisionSound();
-    if (_player.hp <= 0) {
-      pauseEngine();
-      SoundManager.dispose();
-      SoundManager.playGameOverSound();
 
-      overlays.add('GameOverOverlay');
+    if (_player.hp <= 0) {
+      _handleGameOver();
     }
   }
 
   void onPlayerCollectGold() {
     _scoreManager.increment(10);
-    print(_scoreManager.currentScore);
-    
+    scoreNotifier.value = _scoreManager.currentScore;
+
     SoundManager.playPowerUpSound();
   }
 
-  void reset(){
-    print("reset function called");
+  void _handleGameOver() async {
+    pauseEngine();
+    SoundManager.stop();
+    SoundManager.playGameOverSound();
+
+    final currentScore = _scoreManager.currentScore;
+
+    await LocalScoreManager.addScore(currentScore);
+    await LocalScoreManager.saveHighScore(currentScore);
+
+    final highScore = await LocalScoreManager.getHighScore();
+
+    overlays.add('GameOverOverlay');
+  }
+
+  @override
+  Future<void> onRemove() async {
+    playerHpNotifier.dispose();
+    scoreNotifier.dispose();
+    super.onRemove();
   }
 
   int get score => _scoreManager.currentScore;
   int get playerHp => _player.hp;
 }
-
