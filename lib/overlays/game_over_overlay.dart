@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../game/managers/local_score_manager.dart';
-import '../game/utilities/sound_manager.dart';
 
 class GameOverOverlay extends StatelessWidget {
   final VoidCallback onRestart;
@@ -25,61 +24,78 @@ class GameOverOverlay extends StatelessWidget {
         }
 
         final highScore = snapshot.data?[0] as int? ?? 0;
-        final allScores = (snapshot.data?[1] as List<int>?) ?? [];
 
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Game Over',
-                style: TextStyle(fontSize: 32, color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'High Score: $highScore',
-                style: const TextStyle(fontSize: 24, color: Colors.yellow),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'All Scores:',
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: allScores.length,
-                  itemBuilder: (context, index) {
-                    return Text(
-                      '${index + 1}. ${allScores[index]}',
-                      style: const TextStyle(fontSize: 18, color: Colors.white),
-                      textAlign: TextAlign.center,
-                    );
-                  },
+        return Container(
+          color: Colors.black.withOpacity(0.8),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Game Over',
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4,
+                        color: Colors.black,
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      SoundManager.playBackgroundMusic();
-                      onRestart();
-                    },
-                    child: const Text('Restart'),
+                const SizedBox(height: 20),
+                Text(
+                  'High Score: $highScore',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.yellow,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4,
+                        color: Colors.black,
+                        offset: Offset(2, 2),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      SoundManager.playBackgroundMusic();
-                      onMainMenu();
-                    },
-                    child: const Text('Main Menu'),
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: onRestart,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Restart',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        onMainMenu();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Main Menu',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

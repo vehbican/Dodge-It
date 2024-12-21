@@ -1,15 +1,12 @@
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
-import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'components/player.dart';
 import 'components/obstacle.dart';
 import 'components/powerup.dart';
 import 'managers/score_manager.dart';
 import 'managers/level_manager.dart';
 import 'managers/local_score_manager.dart';
-import 'utilities/constants.dart';
 import 'utilities/sound_manager.dart';
 import 'dart:math';
 import 'package:flame/input.dart';
@@ -28,9 +25,6 @@ class DodgeItGame extends FlameGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    await SoundManager.initialize();
-    SoundManager.playBackgroundMusic();
 
     _initializeGame();
   }
@@ -162,7 +156,7 @@ class DodgeItGame extends FlameGame
     await LocalScoreManager.addScore(currentScore);
     await LocalScoreManager.saveHighScore(currentScore);
 
-    final highScore = await LocalScoreManager.getHighScore();
+    //final highScore = await LocalScoreManager.getHighScore();
 
     overlays.add('GameOverOverlay');
   }
