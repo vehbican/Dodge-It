@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../game/utilities/sound_manager.dart';
 import '../game/managers/local_score_manager.dart';
+import 'game_screen.dart';
 
 class MainMenu extends StatefulWidget {
   final void Function(BuildContext) onStart;
@@ -22,9 +23,17 @@ class _MainMenuState extends State<MainMenu> {
   @override
   void initState() {
     super.initState();
-    _initializeScores();
     SoundManager.initialize();
+    _initializeScores();
     SoundManager.playBackgroundMusic();
+  }
+
+  @override
+  void didUpdateWidget(covariant MainMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.scores != oldWidget.scores) {
+      _initializeScores();
+    }
   }
 
   void _initializeScores() {
@@ -76,7 +85,7 @@ class _MainMenuState extends State<MainMenu> {
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton(
-                  onPressed: () => widget.onStart(context),
+                  onPressed: () => _startGame(context),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 40, vertical: 15),
@@ -165,5 +174,17 @@ class _MainMenuState extends State<MainMenu> {
       ),
     );
   }
-}
 
+  void _startGame(BuildContext context) async {
+    final updatedScores = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const GameScreen()),
+    );
+
+    if (updatedScores != null) {
+      setState(() {
+        _sortedScores = Future.value(updatedScores);
+      });
+    }
+  }
+}

@@ -11,9 +11,10 @@ import 'utilities/sound_manager.dart';
 import 'dart:math';
 import 'package:flame/input.dart';
 import 'package:flutter/services.dart';
+import 'package:flame/events.dart';
 
 class DodgeItGame extends FlameGame
-    with HasCollisionDetection, HasKeyboardHandlerComponents {
+    with HasCollisionDetection, HasKeyboardHandlerComponents, PanDetector {
   late Player _player;
   late ScoreManager _scoreManager;
   late LevelManager _levelManager;
@@ -82,6 +83,19 @@ class DodgeItGame extends FlameGame
     }
 
     return KeyEventResult.handled;
+  }
+
+  @override
+  void onPanUpdate(DragUpdateInfo info) {
+    final delta = info.delta.global;
+
+    _player.position.add(Vector2(delta.x, delta.y));
+  }
+
+  @override
+  void onPanEnd(DragEndInfo info) {
+    _player.stopHorizontalMovement();
+    _player.stopVerticalMovement();
   }
 
   void _spawnObstaclesAndGolds() {

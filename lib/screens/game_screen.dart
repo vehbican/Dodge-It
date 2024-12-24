@@ -21,7 +21,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    _game = DodgeItGame();
+    _game = DodgeItGame(); 
   }
 
   @override
@@ -31,11 +31,11 @@ class _GameScreenState extends State<GameScreen> {
         game: _game,
         overlayBuilderMap: {
           'GameOverOverlay': (context, game) => GameOverOverlay(
-                onRestart: _onRestart,
-                onMainMenu: _goToMainMenu,
+                onRestart: _onRestart, 
+                onMainMenu: _goToMainMenu, 
               ),
           'PauseOverlay': (context, game) => PauseOverlay(
-                onResume: _onResume,
+                onResume: _onResume, 
               ),
           'ScoreAndHpOverlay': (context, game) => ScoreAndHpOverlay(
                 game: _game,
@@ -57,26 +57,31 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  
   void _goToMainMenu() async {
-    await _fetchScores();
+    await _fetchScores(); 
     final scores = await _sortedScores;
-    Navigator.of(context).pop(scores);
-    SoundManager.playBackgroundMusic();
+    Navigator.of(context).pop(scores); 
+    SoundManager.playBackgroundMusic(); 
   }
 
+  
   Future<void> _fetchScores() async {
-    _sortedScores = LocalScoreManager.getSortedScores();
+    _sortedScores = LocalScoreManager.getSortedScores(); 
     var scores = await _sortedScores;
     print("Fetched scores: $scores");
   }
 
+  
   void _onRestart() {
-    _game.reset();
-    _game.overlays.remove('GameOverOverlay');
+    _game.reset(); 
+    _game.overlays.remove('GameOverOverlay'); 
   }
 
+  
   void _onResume() {
-    _game.resumeEngine();
-    _game.overlays.remove('PauseOverlay');
+    _game.resumeEngine(); 
+    _game.overlays.remove('PauseOverlay'); 
   }
 }
+
